@@ -15,17 +15,17 @@ public class AlunoRepositoryPostgres implements AlunoRepository {
 
     private void inicializarTabela() {
         String sql = """
-                CREATE TABLE IF NOT EXISTS alunos (
-                    id    SERIAL       PRIMARY KEY,
-                    nome  VARCHAR(150) NOT NULL,
-                    cpf   CHAR(11)     NOT NULL UNIQUE
-                );
-                """;
+            CREATE TABLE IF NOT EXISTS alunos (
+                id    SERIAL       PRIMARY KEY,
+                nome  VARCHAR(150) NOT NULL,
+                cpf   CHAR(11)     NOT NULL UNIQUE
+            );
+            """;
         try (Connection conn = DatabaseConnection.obterConexao();
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao inicializar tabela: " + e.getMessage(), e);
+            System.err.println("AVISO: Banco indisponível na inicialização: " + e.getMessage());
         }
     }
 
