@@ -63,3 +63,180 @@ Hora de colocar o sistema no mundo real e garantir que ele continue de pé e sau
 
 ## Semana 4: Prova Prática
 Aplicação de uma *Hotfix de Emergência* em tempo real para avaliar o domínio sobre o fluxo DevOps construído.
+
+
+# UniespTech — Sistema de Gestão Acadêmica
+
+Sistema acadêmico com persistência real em PostgreSQL, containerização Docker, pipeline CI/CD e monitoramento em produção.
+
+---
+
+## 🚀 Link em Produção
+
+```
+https://uniesptech-production-038c.up.railway.app/health
+```
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Java 21** — Linguagem principal
+- **Maven** — Gerenciamento de dependências e build
+- **PostgreSQL** — Banco de dados relacional
+- **JDBC** — Conexão com o banco de dados
+- **SLF4J + Logback** — Logs estruturados
+- **JUnit 5** — Testes unitários
+- **Docker** — Containerização
+- **GitHub Actions** — CI/CD Pipeline
+- **Railway** — Deploy em nuvem
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+src/main/java/
+├── SistemaUniesp.java          # Ponto de entrada
+├── controller/
+│   └── AlunoController.java    # Camada de controle
+├── service/
+│   └── AlunoService.java       # Regras de negócio + logs
+├── repository/
+│   ├── AlunoRepository.java        # Interface do repositório
+│   ├── AlunoRepositoryMemoria.java # Implementação em memória
+│   └── AlunoRepositoryPostgres.java # Implementação PostgreSQL
+├── model/
+│   └── Aluno.java              # Modelo de dados
+└── infra/
+    ├── DatabaseConnection.java  # Conexão JDBC
+    └── HealthCheckServer.java   # Servidor HTTP /health
+```
+
+---
+
+## ⚙️ Como Rodar Localmente
+
+### Pré-requisitos
+- Java 21
+- Maven
+- PostgreSQL instalado e rodando
+
+### 1. Crie o banco de dados
+```sql
+CREATE DATABASE uniesp_db;
+```
+
+### 2. Configure as variáveis de ambiente
+```bash
+# Windows PowerShell
+$env:DB_URL="jdbc:postgresql://localhost:5432/uniesp_db"
+$env:DB_USER="postgres"
+$env:DB_PASSWORD="sua_senha"
+```
+
+### 3. Compile e rode
+```bash
+mvn clean package -DskipTests
+java -jar target/uniesp-tech.jar
+```
+
+### 4. Verifique o Health Check
+```
+http://localhost:8080/health
+```
+
+---
+
+## 🐳 Como Rodar com Docker
+
+```bash
+docker-compose up --build
+```
+
+O `docker-compose.yml` sobe o PostgreSQL e a aplicação automaticamente.
+
+---
+
+## 🔍 Health Check
+
+O endpoint `/health` verifica a saúde da aplicação e da conexão com o banco:
+
+**Banco online:**
+```json
+{
+  "status": "UP",
+  "database": "UP"
+}
+```
+
+**Banco offline:**
+```json
+{
+  "status": "DOWN",
+  "database": "DOWN"
+}
+```
+
+---
+
+## 📋 Logs Estruturados
+
+Os logs são gerados com SLF4J + Logback e salvos em `logs/uniesp.log`:
+
+```
+2026-04-10 19:00:00 [INFO]  service.AlunoService - Tentativa de cadastro - nome: João, cpf: 12345678901
+2026-04-10 19:00:00 [INFO]  service.AlunoService - Aluno cadastrado com sucesso - id: 1, nome: João
+2026-04-10 19:00:00 [WARN]  service.AlunoService - Cadastro rejeitado - CPF já cadastrado: 12345678901
+2026-04-10 19:00:00 [ERROR] infra.HealthCheckServer - Health check FALHOU - banco indisponivel
+```
+
+---
+
+## 🧪 Testes
+
+Para rodar os testes unitários:
+
+```bash
+mvn test
+```
+
+Os testes cobrem:
+- Validações de nome (vazio, nulo, caracteres inválidos)
+- Validações de CPF (vazio, nulo, letras, tamanho)
+- Cadastro com sucesso
+- Listagem e deleção
+
+---
+
+## 💥 Chaos Test
+
+Para simular queda do banco e verificar o comportamento do sistema:
+
+1. Altere a variável `DB_PASSWORD` para um valor inválido
+2. Acesse `/health` — retornará `{"status": "DOWN", "database": "DOWN"}`
+3. Restaure a senha correta
+4. Acesse `/health` novamente — retornará `{"status": "UP", "database": "UP"}`
+
+O sistema **não crasha** — continua rodando e monitorando a saúde do banco.
+
+---
+
+## 🔄 CI/CD Pipeline
+
+A cada Push ou Pull Request na branch `main` ou `feat/*`:
+
+1. ✅ GitHub Actions executa o build
+2. ✅ Testes unitários rodam automaticamente
+3. ✅ Artefato `.jar` é gerado e publicado
+4. ✅ Railway faz o deploy automático
+
+---
+
+## 🌍 Variáveis de Ambiente
+
+| Variável | Descrição | Padrão |
+|---|---|---|
+| `DB_URL` | URL de conexão JDBC | `jdbc:postgresql://localhost:5432/uniesp_db` |
+| `DB_USER` | Usuário do banco | `postgres` |
+| `DB_PASSWORD` | Senha do banco | `postgres` |
